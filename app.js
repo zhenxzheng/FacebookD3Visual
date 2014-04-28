@@ -23,7 +23,10 @@ app.use(express.bodyParser());
 //routes
 app.get('/', index.view);
 app.get('/auth/facebook', home.auth);
-app.get('/fbloggedin', home.getFriendsBirthday);
+app.get('/fbloggedin', home.getBirthday);
+
+
+
 //set environment ports and start application
 app.set('port', process.env.PORT || 3000);
 http.createServer(app).listen(app.get('port'), function(){
