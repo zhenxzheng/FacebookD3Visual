@@ -29,8 +29,12 @@ exports.auth = function(req, res) {
 	  	"code":           req.query.code
 		}, 
 		function (err, facebookRes) {
-		res.redirect('/fbloggedin');
+		res.redirect('/home');
 	});
+}
+
+exports.view = function(req,res){
+	res.render('home');
 }
 
 exports.getBirthday = function(req,res) {
@@ -75,11 +79,12 @@ exports.getBirthday = function(req,res) {
 			};
 			
 			/*
-				sort valid birthday date
+				sort valid birthday date Jan01~Dec31
 			*/
 			birthdayDate.sort(function(a,b){return a-b;});
 
-			//find birthday in frindlist and mark already inserted
+			//find and assign friends to birthday date acoordingly,
+			//mark already inserted to prevent duplicates
 			for (var i=0; i<birthdayDate.length; i++){
 				var j=0;
 				while (j<valid.length){
@@ -98,7 +103,7 @@ exports.getBirthday = function(req,res) {
 				sort list into monthly variables
 			*/
 			for (var i=0; i<sortedList.length; i++){
-				//look at th month
+				//look at the month
 				var month = sortedList[i].birthday.slice(0,2);
 				//assign birthday month according
 				if 		(month == "01"){Jan.push(sortedList[i]);}
@@ -116,8 +121,11 @@ exports.getBirthday = function(req,res) {
 				else {unknown.push(friends.data[i]);}
 			};
 
+			/*
+				percentage of birthday month in FB friendlist
+			*/
 			var percentage = [];
-			percentage.push((Jan.length/Nfriends*100).toFixed(2));
+			percentage.push((Jan.length/Nfriends*100).toFixed(2)); //2 decimals
 			percentage.push((Feb.length/Nfriends*100).toFixed(2));
 			percentage.push((Mar.length/Nfriends*100).toFixed(2));
 			percentage.push((Apr.length/Nfriends*100).toFixed(2));
@@ -131,6 +139,9 @@ exports.getBirthday = function(req,res) {
 			percentage.push((Dec.length/Nfriends*100).toFixed(2));
 			percentage.push((unknown.length/Nfriends*100).toFixed(2));
 			
+			/*
+				json output
+			*/
 			var data = {
 				birthday:{
 					"Jan":Jan,
@@ -147,16 +158,10 @@ exports.getBirthday = function(req,res) {
 					"Dec":Dec,
 					"unknown":unknown
 				},
-				percentage:percentage
+				percentage:percentage,
+				Nfriends:Nfriends
 			};
-			var sum = 0;
-			for (var i=0; i<percentage.length;i++){
-				sum = sum + data.percentage[i];
-			}
-			// var birthday = data.birthday;
-			 console.log(data);
-	  		res.render('home', data);
+
+	  		res.json(data);
 		});
-	// console.log(data);
-	// res.render("facebook", data);
 }

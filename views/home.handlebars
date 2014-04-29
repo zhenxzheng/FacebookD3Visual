@@ -16,26 +16,100 @@
       <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
       <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
       <script type="text/javascript" src="js/d3/d3.js"></script>
+      <script type="text/javascript" src="js/Donut3D.js"></script>
+      <script type="text/javascript" src="https://code.jquery.com/jquery.js"></script>
       <style type="text/css">
+        body{
+          font-family: san-serif;
+          width:960px;
+          height:500px;
+          position:relative;
+        }
+        path.slice{
+          stroke-width:2px;
+        }
+        polyline{
+          opacity:.3;
+          stroke:black;
+          stroke-width:2px;
+          fill: none;
+        }
+        svg text.percent{
+          fill:white;
+          text-anchor:middle;
+          font-size:12px;
+        }
       </style>
 </head>
 
 <body>
       <div class="container" id="body">
+
       	<script type="text/javascript">
           /*
             initialize essential variables
           */
-          var w = 500;
-          var h = 500;
-          var dataset = {{birthday}}
+          $.get('/home/birthday', callback);
+          function callback(result){
+            console.log(result)
+            var birthday = result['birthday'];
+            var percentage = result['percentage'];
+            var Nfriends = result['Nfriends'];
+            
 
-          //create svg canvas
-          var svg = d3.select("#body")
-                      .append("svg")
-                      .attr("width",w)
-                      .attr("height",h);
+            var w = 700;
+            var h = 500;
+            // var monthlyData=[
+            //   {label:"Jan", color:"#1abc9c", value:{birthday.Jan.length}},
+            //   {label:"Feb", color:"#3498db", value:{birthday.Feb.length}},
+            //   {label:"Mar", color:"#2ecc71", value:{birthday.Mar.length}},
+            //   {label:"Apr", color:"#9b59b6", value:{birthday.Apr.length}},
+            //   {label:"May", color:"#7f8c8d", value:{birthday.May.length}},
+            //   {label:"Jun", color:"#f1c40f", value:{birthday.Jun.length}},
+            //   {label:"Jul", color:"#e74c3c", value:{birthday.Jul.length}},
+            //   {label:"Aug", color:"#c0392b", value:{birthday.Aug.length}},
+            //   {label:"Sept", color:"#e67e22", value:{birthday.Sept.length}},
+            //   {label:"Oct", color:"#f39c12", value:{birthday.Oct.length}},
+            //   {label:"Nov", color:"#d35400", value:{birthday.Nov.length}},
+            //   {label:"Dec", color:"#34495e", value:{birthday.Dec.length}},
+            // ]
+            var monthlyData=[
+              {label:"Jan", color:"#1abc9c", value:percentage[0]},
+              {label:"Feb", color:"#3498db", value:percentage[1]},
+              {label:"Mar", color:"#2ecc71", value:percentage[2]},
+              {label:"Apr", color:"#9b59b6", value:percentage[3]},
+              {label:"May", color:"#7f8c8d", value:percentage[4]},
+              {label:"Jun", color:"#f1c40f", value:percentage[5]},
+              {label:"Jul", color:"#e74c3c", value:percentage[6]},
+              {label:"Aug", color:"#c0392b", value:percentage[7]},
+              {label:"Sept", color:"#e67e22", value:percentage[8]},
+              {label:"Oct", color:"#f39c12", value:percentage[9]},
+              {label:"Nov", color:"#d35400", value:percentage[10]},
+              {label:"Dec", color:"#34495e", value:percentage[11]},
+              {label:"unknown", color:"#993333", value:percentage[12]}
+            ]
+            console.log(monthlyData[1].value)
+  //var monthlyPercentage={{percentage}};
+            //create svg canvas
+            var svg = d3.select("#body")
+                        .append("svg")
+                        .attr("width",w)
+                        .attr("height",h);
+            svg.append("g").attr("id","monthlyDonut")
 
+            Donut3D.draw("monthlyDonut",setData(),150,150,130,100,30,0.4);
+
+            function changeData(){
+              Donut3D.transition("monthlyDonut",setData(),130,100,30,0.4);
+            }
+
+            function setData(){
+              return monthlyData.map(function(d){
+                return {label:d.label, value:d.value, color:d.color};
+              });
+            }
+          };
+    </script>
     </div>
     <script src="https://code.jquery.com/jquery.js"></script>
     <script src="js/bootstrap.js"></script>

@@ -23,7 +23,11 @@ app.use(express.bodyParser());
 //routes
 app.get('/', index.view);
 app.get('/auth/facebook', home.auth);
-app.get('/fbloggedin', home.getBirthday);
+app.get('/home',home.view);
+app.get('/home/birthday', home.getBirthday);
+// app.get('/home', function(req,res){
+// 	res.render('home');
+// });
 
 
 
