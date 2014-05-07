@@ -20,10 +20,9 @@
       <script type="text/javascript" src="https://code.jquery.com/jquery.js"></script>
       <style type="text/css">
         body{
-          font-family: san-serif;
-          width:960px;
-          height:500px;
-          position:relative;
+          font-family: sans-serif;
+          width:100%;
+          height:100%;
         }
         path.slice{
           stroke-width:2px;
@@ -33,83 +32,344 @@
           stroke:black;
           stroke-width:2px;
           fill: none;
-        }
+        }/*
         svg text.percent{
           fill:white;
           text-anchor:middle;
           font-size:12px;
-        }
+        }*/
       </style>
 </head>
 
 <body>
-      <div class="container" id="body">
-
-      	<script type="text/javascript">
+    <div class="container" id="body">
+      <h2>FB Friendlist Birthday Overview</h2>
+      <label><input type="checkbox" id="unknownBox" checked=true>unknown</label>
+       	<script type="text/javascript">
           /*
-            initialize essential variables
+             initialize essential variables
           */
           $.get('/home/birthday', callback);
           function callback(result){
-            console.log(result)
             var birthday = result['birthday'];
             var percentage = result['percentage'];
             var Nfriends = result['Nfriends'];
-            
+            var flag = false;
+            console.log();
+    //         var w = 960;
+    //         var h = 500;
 
-            var w = 700;
-            var h = 500;
-            // var monthlyData=[
-            //   {label:"Jan", color:"#1abc9c", value:{birthday.Jan.length}},
-            //   {label:"Feb", color:"#3498db", value:{birthday.Feb.length}},
-            //   {label:"Mar", color:"#2ecc71", value:{birthday.Mar.length}},
-            //   {label:"Apr", color:"#9b59b6", value:{birthday.Apr.length}},
-            //   {label:"May", color:"#7f8c8d", value:{birthday.May.length}},
-            //   {label:"Jun", color:"#f1c40f", value:{birthday.Jun.length}},
-            //   {label:"Jul", color:"#e74c3c", value:{birthday.Jul.length}},
-            //   {label:"Aug", color:"#c0392b", value:{birthday.Aug.length}},
-            //   {label:"Sept", color:"#e67e22", value:{birthday.Sept.length}},
-            //   {label:"Oct", color:"#f39c12", value:{birthday.Oct.length}},
-            //   {label:"Nov", color:"#d35400", value:{birthday.Nov.length}},
-            //   {label:"Dec", color:"#34495e", value:{birthday.Dec.length}},
-            // ]
             var monthlyData=[
-              {label:"Jan", color:"#1abc9c", value:percentage[0]},
-              {label:"Feb", color:"#3498db", value:percentage[1]},
-              {label:"Mar", color:"#2ecc71", value:percentage[2]},
-              {label:"Apr", color:"#9b59b6", value:percentage[3]},
-              {label:"May", color:"#7f8c8d", value:percentage[4]},
-              {label:"Jun", color:"#f1c40f", value:percentage[5]},
-              {label:"Jul", color:"#e74c3c", value:percentage[6]},
-              {label:"Aug", color:"#c0392b", value:percentage[7]},
-              {label:"Sept", color:"#e67e22", value:percentage[8]},
-              {label:"Oct", color:"#f39c12", value:percentage[9]},
-              {label:"Nov", color:"#d35400", value:percentage[10]},
-              {label:"Dec", color:"#34495e", value:percentage[11]},
-              {label:"unknown", color:"#993333", value:percentage[12]}
+              {label:"Jan", numPeople:birthday.Jan.length, value:percentage[0]},
+              {label:"Feb", numPeople:birthday.Feb.length, value:percentage[1]},
+              {label:"Mar", numPeople:birthday.Mar.length, value:percentage[2]},
+              {label:"Apr", numPeople:birthday.Apr.length, value:percentage[3]},
+              {label:"May", numPeople:birthday.May.length, value:percentage[4]},
+              {label:"Jun", numPeople:birthday.Jun.length, value:percentage[5]},
+              {label:"Jul", numPeople:birthday.Jul.length, value:percentage[6]},
+              {label:"Aug", numPeople:birthday.Aug.length, value:percentage[7]},
+              {label:"Sept", numPeople:birthday.Sept.length, value:percentage[8]},
+              {label:"Oct", numPeople:birthday.Oct.length, value:percentage[9]},
+              {label:"Nov", numPeople:birthday.Nov.length, value:percentage[10]},
+              {label:"Dec", numPeople:birthday.Dec.length, value:percentage[11]},
+              {label:"unknown", numPeople:birthday.unknown.length, value:percentage[12]}
             ]
-            console.log(monthlyData[1].value)
-  //var monthlyPercentage={{percentage}};
-            //create svg canvas
-            var svg = d3.select("#body")
-                        .append("svg")
-                        .attr("width",w)
-                        .attr("height",h);
-            svg.append("g").attr("id","monthlyDonut")
 
-            Donut3D.draw("monthlyDonut",setData(),150,150,130,100,30,0.4);
+            var labels=[];
+            labels = monthlyData.map(function(d){
+              return d.label;
+            });
+            var values=[];
+            values = monthlyData.map(function(d){
+              return d.value;
+            });
 
-            function changeData(){
-              Donut3D.transition("monthlyDonut",setData(),130,100,30,0.4);
-            }
+    //         var seasonalData=[
+    //           {label:"Spring", color:"#2ecc71", value:percentage[2]+percentage[3]+percentage[4]},
+    //           {label:"Summer", color:"#34495e", value:percentage[5]+percentage[6]+percentage[7]},
+    //           {label:"Fall", color:"#d35400", value:percentage[8]+percentage[9]+percentage[10]},
+    //           {label:"Winter", color:"#2980b9", value:percentage[11]+percentage[0]+percentage[1]},
+    //           {label:"unknown", color:"#993333", value:percentage[12]}
+    //         ]
 
-            function setData(){
-              return monthlyData.map(function(d){
-                return {label:d.label, value:d.value, color:d.color};
+            var svg = d3.select("body")
+              .append("svg")
+              .append("g")
+
+            svg.append("g")
+              .attr("class", "slices");
+            svg.append("g")
+              .attr("class", "labels");
+            svg.append("g")
+              .attr("class", "lines");
+            svg.append("g")
+              .attr("class", "list");
+            svg.append("g")
+              .attr("class", "title");
+
+
+            var width = 960,
+                height = 450,
+              radius = Math.min(width, height) / 2;
+
+            var pie = d3.layout.pie()
+              .sort(null)
+              .value(function(d) {
+                return d.value;
               });
+
+            var arc = d3.svg.arc()
+              .outerRadius(radius * 0.8)
+              .innerRadius(radius * 0.4);
+
+            var outerArc = d3.svg.arc()
+              .innerRadius(radius * 0.9)
+              .outerRadius(radius * 0.9);
+
+            svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+            var key = function(d){ return d.data.label; };
+
+            var color = d3.scale.category20()
+              .domain(labels)
+              //.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+            function setData (){
+              var labels = color.domain();
+              return labels.map(function(label,i){
+                return { label: label, value: values[i] }
+              }).filter(function(d) {
+                return d != 0;
+              })
+              // .sort(function(a,b) {
+              //   return d3.ascending(a.label, b.label);
+              // })
+              ;
             }
+
+            change(setData());
+
+            d3.select(".randomize")
+              .on("click", function(){
+                change(setData());
+              });
+
+            d3.select("#unknownBox").on("change", function(){
+              if (this.checked){
+                values[values.length-1]=percentage[12];
+              }
+              else{
+                values[values.length-1]=0;
+              }
+              change(setData());
+            });
+
+            function mergeWithFirstEqualZero(first, second){
+              var secondSet = d3.set(); second.forEach(function(d) { secondSet.add(d.label); });
+
+              var onlyFirst = first
+                .filter(function(d){ return !secondSet.has(d.label) })
+                .map(function(d) { return {label: d.label, value: 0}; });
+              return d3.merge([ second, onlyFirst ])
+                .sort(function(a,b) {
+                  return d3.ascending(a.label, b.label);
+                });
+            }
+
+            function change(data) {
+              var duration = 2000;
+              var data0 = svg.select(".slices").selectAll("path.slice")
+                .data().map(function(d) { return d.data });
+              if (data0.length == 0) data0 = data;
+              var was = mergeWithFirstEqualZero(data, data0);
+              var is = mergeWithFirstEqualZero(data0, data);
+
+              /* ------- SLICE ARCS -------*/
+
+              var slice = svg.select(".slices").selectAll("path.slice")
+                .data(pie(was), key);
+
+              slice.enter()
+                .insert("path")
+                .attr("class", "slice")
+                .style("fill", function(d) { return color(d.data.label); })
+                .each(function(d) {
+                  this._current = d;
+                });
+
+              slice = svg.select(".slices").selectAll("path.slice")
+                .data(pie(is), key);
+
+              slice   
+                .transition().duration(duration)
+                .attrTween("d", function(d) {
+                  var interpolate = d3.interpolate(this._current, d);
+                  var _this = this;
+                  return function(t) {
+                    _this._current = interpolate(t);
+                    return arc(_this._current);
+                  };
+                });
+
+              slice = svg.select(".slices").selectAll("path.slice")
+                .data(pie(data), key);
+
+              slice
+                .exit().transition().delay(duration).duration(0)
+                .remove();
+
+              /* ------- TEXT LABELS -------*/
+
+              var text = svg.select(".labels").selectAll("text")
+                .data(pie(was), key);
+
+              text.enter()
+                .append("text")
+                .attr("dy", ".35em")
+                .style("opacity", 0)
+                .text(function(d,i) {
+                  console.log(values[i]);
+                  return d.data.label +" "+values[i]+"%";
+                })
+                .each(function(d) {
+                  this._current = d;
+                });
+              
+              function midAngle(d){
+                return d.startAngle + (d.endAngle - d.startAngle)/2;
+              }
+
+              text = svg.select(".labels").selectAll("text")
+                .data(pie(is), key);
+
+              text.transition().duration(duration)
+                .style("opacity", function(d) {
+                  return d.data.value == 0 ? 0 : 1;
+                })
+                .attrTween("transform", function(d) {
+                  var interpolate = d3.interpolate(this._current, d);
+                  var _this = this;
+                  return function(t) {
+                    var d2 = interpolate(t);
+                    _this._current = d2;
+                    var pos = outerArc.centroid(d2);
+                    pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
+                    return "translate("+ pos +")";
+                  };
+                })
+                .styleTween("text-anchor", function(d){
+                  var interpolate = d3.interpolate(this._current, d);
+                  return function(t) {
+                    var d2 = interpolate(t);
+                    return midAngle(d2) < Math.PI ? "start":"end";
+                  };
+                });
+              
+              text = svg.select(".labels").selectAll("text")
+                .data(pie(data), key);
+
+              text
+                .exit().transition().delay(duration)
+                .remove();
+
+              /* ------- SLICE TO TEXT POLYLINES -------*/
+
+              var polyline = svg.select(".lines").selectAll("polyline")
+                .data(pie(was), key);
+              
+              polyline.enter()
+                .append("polyline")
+                .style("opacity", 0)
+                .each(function(d) {
+                  this._current = d;
+                });
+
+              polyline = svg.select(".lines").selectAll("polyline")
+                .data(pie(is), key);
+              
+              polyline.transition().duration(duration)
+                .style("opacity", function(d) {
+                  return d.data.value == 0 ? 0 : .5;
+                })
+                .attrTween("points", function(d){
+                  this._current = this._current;
+                  var interpolate = d3.interpolate(this._current, d);
+                  var _this = this;
+                  return function(t) {
+                    var d2 = interpolate(t);
+                    _this._current = d2;
+                    var pos = outerArc.centroid(d2);
+                    pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+                    return [arc.centroid(d2), outerArc.centroid(d2), pos];
+                  };      
+                });
+              
+              polyline = svg.select(".lines").selectAll("polyline")
+                .data(pie(data), key);
+              
+              polyline
+                .exit().transition().delay(duration)
+                .remove();
+
+              if (!flag){
+                flag = true;
+                listSetup();
+              };
+
+              /*
+                Title list
+              */
+              function listSetup (){
+                var x0=500,
+                    x1=600,
+                    x2=700,
+                    y0=-150;
+                    
+                var xspaces=[x0,x1,x2];
+                var tableHeader = ["Month", "# of Friends", "%"];
+
+                var listTitle = svg.select(".title")
+                  .append("text")
+                  .text("You have "+Nfriends+" friends!")
+                  .attr("x", x0)
+                  .attr("y", y0-50);
+
+                listTitle.selectAll("tspan")
+                  .data(tableHeader)
+                  .enter()
+                  .append("tspan")
+                  .text(function (d){return d})
+                  .attr("x", function (d,i){ return xspaces[i];})
+                  .attr("y", y0);
+
+                var infolist = svg.select(".list").append("text")
+                  .attr("x",500)
+                  .attr("y", function(d,i){ return -150+i*20;});
+
+
+                var datalist=infolist.selectAll("tspan")
+                    .data(monthlyData)
+                    .enter();
+
+                datalist.append("tspan")
+                    .text(function (d,i){return d.label;})
+                    .attr("x",function (d,i){return x0})
+                    .attr("y",function (d,i){return y0+i*25+50});
+
+                datalist.append("tspan")
+                    .text(function (d,i){return d.numPeople;})
+                    .attr("x",function (d,i){return x1})
+                    .attr("y",function (d,i){return y0+i*25+50});
+
+                datalist.append("tspan")
+                    .text(function (d,i){return d.value;})
+                    .attr("x",function (d,i){return x2})
+                    .attr("y",function (d,i){return y0+i*25+50});
+              };
+            };
           };
-    </script>
+        </script>
+
     </div>
     <script src="https://code.jquery.com/jquery.js"></script>
     <script src="js/bootstrap.js"></script>
